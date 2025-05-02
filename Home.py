@@ -51,16 +51,6 @@ with col1:
     ):
         st.switch_page("pages/1_AI_Usage_Reflection.py")
     
-    # Button 2 - AI Literacy Modules
-    if st.button(
-        "AI Literacy Modules",
-        key="btn_literacy",
-        help="Learn essential AI concepts",
-        use_container_width=True
-    ):
-        st.switch_page("pages/2_AI_Literacy_Modules.py")
-
-with col2:
     # Button 3 - AI Challenges
     if st.button(
         "AI Challenges & Activities",
@@ -69,7 +59,17 @@ with col2:
         use_container_width=True
     ):
         st.switch_page("pages/3_AI_Challenges_and_Activities.py")
-    
+
+with col2:
+    # Button 2 - AI Literacy Modules
+    if st.button(
+        "AI Literacy Modules",
+        key="btn_literacy",
+        help="Learn essential AI concepts",
+        use_container_width=True
+    ):
+        st.switch_page("pages/2_AI_Literacy_Modules.py")
+        
     # Button 4 - Community Forum
     if st.button(
         "Community Forum",
