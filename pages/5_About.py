@@ -19,8 +19,8 @@ def about_page():
     # Platform description
     st.markdown("""
     **AI Study Buddy** is a web-based learning platform, it is designed to address AI overreliance in 
-    learning and enhance students' AI literacy. Grounded in Cognitive Constructivism, the AI Literacy 
-    Framework by Long & Magerko (2020), and Motivation theories, the platform focuses on teaching 
+    learning and enhance students' AI literacy. Grounded in Motivation theories, the AI Literacy 
+    Framework by Long & Magerko (2020), and Piaget's Cognitive Constructivism theory, the platform focuses on teaching 
     students essential AI knowledge and strategic utilization. It aims to help achieve a balance between 
     leveraging AI's benefits for learning and sustaining essential cognitive development. The platform 
     is open to all students, students of any major, grade, or academic level are welcome to use it to 
