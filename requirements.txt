@@ -1,2 +1,3 @@
 streamlit
 datetime
+google.generativeai
