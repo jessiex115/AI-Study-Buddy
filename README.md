@@ -1,6 +1,6 @@
 Project Name: AI Study Buddy
 
-Description: A web-based learning platform aimed at teaching students responsible use of AI and enhancing AI literacy. It’s organized around three core sections—AI Usage Reflection, AI Literacy Modules, AI Challenges and Activities—and includes a Community Forum feature. 
+Description: A web-based learning platform, it is designed to teach students responsible use of AI and enhance their AI literacy. Based on learning theories and AI literacy framework, it has three core sections: AI Usage Reflection, AI Literacy Modules, and AI Challenges and Activities; and a Community Forum feature. 
 
 Live Demo: Hosted on Streamlit. 
 
