@@ -1,14 +1,36 @@
-Project Name: AI Study Buddy
+# AI Study Buddy
 
-Description: A web-based learning platform, designed to teach students responsible use of AI and enhance their AI literacy. Based on learning theories and AI literacy framework, it has three core sections: AI Usage Reflection, AI Literacy Modules, and AI Challenges and Activities; and a Community Forum feature. 
+## Overview  
+AI Study Buddy is a **web-based learning platform** designed to address the growing concern of **students’ overreliance on AI in learning** while promoting **AI literacy**. It helps students leverage AI responsibly by combining **essential AI knowledge** with **guided reflection on usage habits**, ensuring cognitive growth and independent learning ability are not compromised.
 
-Live Demo: Hosted on Streamlit. 
+The platform is grounded in:  
+- **Motivation Theories**  
+- **AI Literacy Framework (Long & Magerko, 2020)**  
+- **Piaget’s Cognitive Constructivism**  
 
-File Structure (top-level):
-.devcontainer/
-pages/
-.gitignore
-Home.py
-requirements.txt 
+Together, these theoretical foundations support students in balancing AI’s benefits with their own cognitive development.  
 
-Languages Used: Python (100%)
+---
+
+## Features  
+- 📖 **AI Literacy Modules** – Learn essential AI concepts and responsible usage strategies.  
+- ✍️ **AI Usage Reflection** – Reflect on your personal AI usage and receive personalized feedback.  
+- 🎯 **AI Challenges & Activities** – Engage in practical exercises to strengthen AI literacy.  
+- 💬 **AI Community Forum** – Share insights, ask questions, and learn from peers.  
+- ⚡ **Dynamic AI Support** – Integrates **Google Gemini 1.5 Flash API** to generate AI usage assessment questions and personalized advice.  
+
+---
+
+## Tech Stack  
+- **Python**  
+- **Streamlit** – for building a clean and interactive web interface  
+- **Google Gemini 1.5 Flash API** – for dynamic question generation & personalized recommendations  
+
+---
+
+## Installation & Setup  
+
+1. Clone this repository:  
+   ```bash
+   git clone https://github.com/jessiex115/AI-Study-Buddy.git
+   cd AI-Study-Buddy
