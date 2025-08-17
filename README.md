@@ -13,6 +13,8 @@ The platform is grounded in:
 
 Together, these theoretical foundations support students in balancing AI’s benefits with their own cognitive development.  
 
+Reference: Long, D., & Magerko, B. (2020). What is AI literacy? competencies and design considerations. In Proceedings of the 2020 CHI conference on human factors in computing systems. https://doi.org/10.1145/3313831.3376727
+
 ---
 
 ## Features  
@@ -49,6 +51,8 @@ Together, these theoretical foundations support students in balancing AI’s ben
    streamlit run Home.py
 5. Open your browser and go to the local URL provided by Streamlit (usually http://localhost:8501).
 
+---
+
 Author
 Developed by Jiaxin (Jessie) Xu
-📧 jessie02115@gmail.com
+Email: jessie02115@gmail.com
