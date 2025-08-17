@@ -4,7 +4,7 @@
 > **Prototype Link:** [https://ai-studybuddy.streamlit.app](https://ai-studybuddy.streamlit.app)
 
 ## Overview  
-AI Study Buddy is a **web-based learning platform** designed to address the growing concern of **students’ overreliance on AI in learning** while promoting **AI literacy**. It helps students leverage AI responsibly by combining **essential AI knowledge** with **guided reflection on usage habits**, ensuring cognitive growth and independent learning ability are not compromised.
+AI Study Buddy is a **web-based learning platform** that empowers students to develop **AI literacy** and **use AI responsibly in their learning process**. By combining **foundational AI knowledge** with **guided reflection on personal usage habits**, the platform helps students harness AI’s benefits strategically while supporting cognitive growth and fostering independent learning skills.
 
 The platform is grounded in:  
 - **Motivation Theories**  
