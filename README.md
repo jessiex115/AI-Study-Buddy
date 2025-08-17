@@ -1,5 +1,7 @@
 # AI Study Buddy
 
+> **Note:** This is currently a **prototype**, and platform development is in progress. Features and content may change as the project evolves.
+
 ## Overview  
 AI Study Buddy is a **web-based learning platform** designed to address the growing concern of **students’ overreliance on AI in learning** while promoting **AI literacy**. It helps students leverage AI responsibly by combining **essential AI knowledge** with **guided reflection on usage habits**, ensuring cognitive growth and independent learning ability are not compromised.
 
@@ -34,3 +36,18 @@ Together, these theoretical foundations support students in balancing AI’s ben
    ```bash
    git clone https://github.com/jessiex115/AI-Study-Buddy.git
    cd AI-Study-Buddy
+2. Create and activate a virtual environment (recommended):
+   ```bash
+   python -m venv venv
+   source venv/bin/activate   # On Windows: venv\Scripts\activate
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+4. Run the app:
+   ```bash
+   streamlit run Home.py
+5. Open your browser and go to the local URL provided by Streamlit (usually http://localhost:8501).
+
+Author
+Developed by Jiaxin (Jessie) Xu
+📧 jessie02115@gmail.com
