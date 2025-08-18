@@ -55,4 +55,5 @@ Reference: Long, D., & Magerko, B. (2020). What is AI literacy? competencies and
 
 Author
 Developed by Jiaxin (Jessie) Xu
+
 Email: jessie02115@gmail.com
