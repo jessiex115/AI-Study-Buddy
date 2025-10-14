@@ -33,28 +33,6 @@ Reference: Long, D., & Magerko, B. (2020). What is AI literacy? competencies and
 
 ---
 
-## Installation & Setup  
-
-1. Clone this repository:  
-   ```bash
-   git clone https://github.com/jessiex115/AI-Study-Buddy.git
-   cd AI-Study-Buddy
-2. Create and activate a virtual environment (recommended):
-   ```bash
-   python -m venv venv
-   source venv/bin/activate   # On Windows: venv\Scripts\activate
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-4. Run the app:
-   ```bash
-   streamlit run Home.py
-5. Open your browser and go to the local URL provided by Streamlit (usually http://localhost:8501).
-
----
-
-
-
 Developed by Jiaxin (Jessie) Xu
 
 Email: jessie02115@gmail.com
