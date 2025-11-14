@@ -30,9 +30,3 @@ Reference: Long, D., & Magerko, B. (2020). What is AI literacy? competencies and
 - **Python**  
 - **Streamlit** – for building a clean and interactive web interface  
 - **Google Gemini 1.5 Flash API** – for dynamic question generation & personalized recommendations  
-
----
-
-Developed by Jiaxin (Jessie) Xu
-
-Email: jessie02115@gmail.com
