@@ -151,10 +151,11 @@ elif st.session_state.selected_module == "assessment":
         st.info("Generate questions to begin your assessment.")
         if st.button("Generate Assessment Questions"):
             try:
+                # Configure API with your key
                 genai.configure(api_key=st.secrets["google"]["api_key"])
 
-                # FIX: Use the correct full model name
-                model = genai.GenerativeModel("models/gemini-1.5-flash-latest")
+                # Use a working model that supports generate_content
+                model = genai.GenerativeModel("models/text-bison-001")
                 
                 prompt = """Generate exactly 5 multiple-choice questions about AI usage habits for students. 
                 Each question should have 4 options (A-D) and cover different aspects of AI usage including:
@@ -197,6 +198,37 @@ elif st.session_state.selected_module == "assessment":
                 
             except Exception as e:
                 st.error(f"Failed to generate questions: {str(e)}")
+    else:
+        with st.form("assessment_form"):
+            st.write("**Please answer the following questions:**")
+            
+            for idx, question in enumerate(st.session_state.hbit_questions):
+                with st.container():
+                    st.markdown(f"<div class='question-card'><strong>{idx+1}. {question['text']}</strong></div>", 
+                               unsafe_allow_html=True)
+                    
+                    answer_key = f"q{idx}"
+                    options = [opt.split(". ", 1)[1] if ". " in opt else opt for opt in question['options']]
+                    st.session_state.user_answers[answer_key] = st.radio(
+                        "Select your answer:",
+                        options,
+                        key=answer_key,
+                        index=None
+                    )
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                submitted = st.form_submit_button("Submit Assessment")
+                if submitted:
+                    if all(st.session_state.user_answers.values()):
+                        st.success("Assessment submitted successfully!")
+                    else:
+                        st.warning("Please answer all questions before submitting.")
+            with col2:
+                if st.form_submit_button("Reset Assessment"):
+                    st.session_state.habit_questions = []
+                    st.session_state.user_answers = {}
+                    st.rerun()
 
 # --- Personal Usage Report ---
 elif st.session_state.selected_module == "report":
