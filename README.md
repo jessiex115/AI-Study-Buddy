@@ -1,6 +1,6 @@
 # AI Study Buddy
 
-> **Note:** This is currently a **prototype**, and platform development is in progress. Features and content may change as the project evolves.  
+> **Note:** This is a **prototype**, the platform development is in progress. Features and content may change as the project evolves.  
 > **Prototype Link:** [https://ai-studybuddy.streamlit.app](https://ai-studybuddy.streamlit.app) (It takes some time to load)
 
 ## Overview  
