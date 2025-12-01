@@ -152,7 +152,7 @@ elif st.session_state.selected_module == "assessment":
         if st.button("Generate Assessment Questions"):
             try:
                 genai.configure(api_key=st.secrets["google"]["api_key"])
-                model = genai.GenerativeModel("gemini-1.5-flash")
+                model = genai.GenerativeModel("gemini-2.5-flash")
                 
                 prompt = """Generate exactly 5 multiple-choice questions about AI usage habits for students. 
                 Each question should have 4 options (A-D) and cover different aspects of AI usage including:
@@ -316,7 +316,7 @@ elif st.session_state.selected_module == "report":
         if st.session_state.journal_entries or st.session_state.habit_questions:
             try:
                 genai.configure(api_key=st.secrets["google"]["api_key"])
-                model = genai.GenerativeModel("gemini-1.5-flash")
+                model = genai.GenerativeModel("gemini-2.5-flash")
                 
                 journal_context = "\n".join(
                     f"Entry {idx+1} ({entry['date']}): Task: {entry['task']}, Tool: {entry['tool']}, Usage: {entry['usage']}"
