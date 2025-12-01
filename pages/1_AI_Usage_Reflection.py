@@ -152,21 +152,18 @@ elif st.session_state.selected_module == "assessment":
         if st.button("Generate Assessment Questions"):
             try:
                 genai.configure(api_key=st.secrets["google"]["api_key"])
-                model = genai.GenerativeModel("gemini-2.5-flash")
-                
+                model = genai.GenerativeModel("gemini-2.0-flash") # Make sure model name is correct
+
                 prompt = """Generate exactly 5 multiple-choice questions about AI usage habits for students. 
-                Each question should have 4 options (A-D) and cover different aspects of AI usage including:
-                - Frequency of use
-                - Types of tasks
-                - Ethical considerations
-                - Learning effectiveness
+                Each question should have 4 options (A-D).
                 
-                Format each question like this example:
-                Question: How often do you use AI tools for academic work?
-                A. Never
-                B. Rarely (1-2 times per week)
-                C. Regularly (3-5 times per week)
-                D. Daily"""
+                STRICT FORMAT:
+                Question: [Question Text]
+                A. [Option A]
+                B. [Option B]
+                C. [Option C]
+                D. [Option D]
+                """
                 
                 with st.spinner("Generating personalized questions..."):
                     response = model.generate_content(prompt)
@@ -177,22 +174,35 @@ elif st.session_state.selected_module == "assessment":
                         
                         for line in response.text.split('\n'):
                             line = line.strip()
-                            if line.startswith("Question:"):
-                                if current_question:
+                            
+                            # FIX 1: Looser check for "Question:" (handles "1. Question:" or "**Question:**")
+                            if "Question:" in line:
+                                if current_question and 'options' in current_question:
                                     questions.append(current_question)
+                                
+                                # Clean the text to remove "1. ", "**", etc.
+                                clean_text = line.split("Question:", 1)[1].strip()
                                 current_question = {
-                                    'text': line.replace("Question:", "").strip(),
+                                    'text': clean_text,
                                     'options': []
                                 }
-                            elif line and line[0] in ['A', 'B', 'C', 'D']:
-                                current_question['options'].append(line)
+                            
+                            # FIX 2: Check if 'options' exists before appending
+                            elif line and len(line) > 0 and line[0] in ['A', 'B', 'C', 'D']:
+                                if 'options' in current_question:
+                                    current_question['options'].append(line)
                         
-                        if current_question:
+                        # Append the last question found
+                        if current_question and 'options' in current_question:
                             questions.append(current_question)
                         
-                        st.session_state.habit_questions = questions[:5]
-                        st.rerun()
-                
+                        # Ensure we have questions before saving
+                        if questions:
+                            st.session_state.habit_questions = questions[:5]
+                            st.rerun()
+                        else:
+                            st.error("The AI generated a response, but we couldn't parse the questions. Please try again.")
+
             except Exception as e:
                 st.error(f"Failed to generate questions: {str(e)}")
     else:
