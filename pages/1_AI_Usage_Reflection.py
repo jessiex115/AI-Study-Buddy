@@ -261,6 +261,7 @@ elif st.session_state.selected_module == "assessment":
                     st.session_state.user_answers = {}
                     st.rerun()
 
+
 # --- Personal Usage Report ---
 elif st.session_state.selected_module == "report":
     st.header("AI Usage Pattern Report")
@@ -524,7 +525,36 @@ elif st.session_state.selected_module == "report":
                 
                 # Provide sample feedback as fallback
                 if st.button("Show Sample Feedback Instead"):
-                    display_sample_feedback()
+                    st.subheader("Personalized Feedback Report (Sample)")
+                    st.markdown("""
+                    ### Usage Patterns Analysis
+                    Based on your usage patterns, you're in the early stages of exploring AI tools for academic work. 
+                    You're primarily using AI for basic tasks and are developing an understanding of how these tools can support your learning.
+                    
+                    ### Strengths in AI Utilization
+                    - **Exploratory Mindset**: You're willing to try different AI tools and applications
+                    - **Ethical Awareness**: You show consideration for responsible AI use
+                    - **Task-Specific Applications**: You're beginning to match tools to specific learning needs
+                    
+                    ### Areas for Improvement
+                    - **Integration Strategy**: Consider how AI can be more systematically integrated into your workflow
+                    - **Advanced Features**: Explore beyond basic usage to discover more powerful features
+                    - **Critical Evaluation**: Develop stronger skills in evaluating AI-generated content
+                    
+                    ### Recommended Strategies
+                    1. **Create an AI Learning Plan**: Dedicate specific times each week to explore new AI tools
+                    2. **Tool Specialization**: Identify 2-3 AI tools that work best for your specific subjects
+                    3. **Peer Learning**: Join or create a study group focused on effective AI usage
+                    4. **Reflection Practice**: Keep a weekly log of what AI strategies worked best
+                    
+                    ### Suggested Tools and Resources
+                    - **For Writing**: Grammarly, Hemingway Editor, ChatGPT for brainstorming
+                    - **For Research**: Consensus, Elicit, Google Scholar with AI assistance
+                    - **For Coding**: GitHub Copilot, Replit, Codeium
+                    - **Learning Resources**: Coursera's "AI for Everyone", edX AI courses, AI tool tutorials on YouTube
+                    
+                    **Next Steps**: Try one new AI tool this week and reflect on how it affected your productivity.
+                    """)
         else:
             st.warning("Please complete at least one module (Journal or Assessment) before generating feedback.")
             
@@ -545,38 +575,3 @@ elif st.session_state.selected_module == "report":
 
 else:
     st.info("Please select a module from the options above to begin your reflection.")
-
-
-# Helper function for sample feedback
-def display_sample_feedback():
-    """Display sample feedback when API is not available"""
-    st.subheader("Personalized Feedback Report (Sample)")
-    st.markdown("""
-    ### Usage Patterns Analysis
-    Based on your usage patterns, you're in the early stages of exploring AI tools for academic work. 
-    You're primarily using AI for basic tasks and are developing an understanding of how these tools can support your learning.
-    
-    ### Strengths in AI Utilization
-    - **Exploratory Mindset**: You're willing to try different AI tools and applications
-    - **Ethical Awareness**: You show consideration for responsible AI use
-    - **Task-Specific Applications**: You're beginning to match tools to specific learning needs
-    
-    ### Areas for Improvement
-    - **Integration Strategy**: Consider how AI can be more systematically integrated into your workflow
-    - **Advanced Features**: Explore beyond basic usage to discover more powerful features
-    - **Critical Evaluation**: Develop stronger skills in evaluating AI-generated content
-    
-    ### Recommended Strategies
-    1. **Create an AI Learning Plan**: Dedicate specific times each week to explore new AI tools
-    2. **Tool Specialization**: Identify 2-3 AI tools that work best for your specific subjects
-    3. **Peer Learning**: Join or create a study group focused on effective AI usage
-    4. **Reflection Practice**: Keep a weekly log of what AI strategies worked best
-    
-    ### Suggested Tools and Resources
-    - **For Writing**: Grammarly, Hemingway Editor, ChatGPT for brainstorming
-    - **For Research**: Consensus, Elicit, Google Scholar with AI assistance
-    - **For Coding**: GitHub Copilot, Replit, Codeium
-    - **Learning Resources**: Coursera's "AI for Everyone", edX AI courses, AI tool tutorials on YouTube
-    
-    **Next Steps**: Try one new AI tool this week and reflect on how it affected your productivity.
-    """)
