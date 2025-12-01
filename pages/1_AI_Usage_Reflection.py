@@ -143,6 +143,8 @@ if st.session_state.selected_module == "experience":
                 """, unsafe_allow_html=True)
 
 # --- Usage Habit Assessment ---
+# 修改你的代码，添加模型检查：
+
 elif st.session_state.selected_module == "assessment":
     st.header("Usage Habit Assessment")
     st.markdown("Evaluate your patterns and habits when using AI for learning.")
@@ -154,17 +156,65 @@ elif st.session_state.selected_module == "assessment":
                 # Configure API with your key
                 genai.configure(api_key=st.secrets["google"]["api_key"])
                 
-                # OPTION 1: 尝试 gemini-pro（最通用）
-                model = genai.GenerativeModel("gemini-pro")
+                # 先检查可用的模型
+                st.write("Checking available models...")
+                available_models = []
+                for model in genai.list_models():
+                    if "generateContent" in model.supported_generation_methods:
+                        available_models.append(model.name)
+                        st.write(f"✓ {model.name}")
                 
-                # OPTION 2: 或者尝试完整的模型路径
-                # model = genai.GenerativeModel("models/gemini-pro")
+                if not available_models:
+                    st.error("No models with generateContent found! Check your API key permissions.")
+                    
+                    # 尝试使用备用的text-bison模型（如果可用）
+                    try:
+                        # 尝试旧版API的模型名称
+                        import requests
+                        API_KEY = st.secrets["google"]["api_key"]
+                        url = f"https://generativelanguage.googleapis.com/v1beta/models?key={API_KEY}"
+                        response = requests.get(url)
+                        if response.status_code == 200:
+                            models = response.json().get('models', [])
+                            st.write("Available models from API:")
+                            for model in models:
+                                st.write(f"- {model.get('name')}")
+                    except Exception as api_error:
+                        st.write(f"API check error: {api_error}")
+                    
+                    return
                 
-                # OPTION 3: 列出所有可用模型以查看正确的名称
-                # st.write("Available models:")
-                # for m in genai.list_models():
-                #     if "generateContent" in m.supported_generation_methods:
-                #         st.write(f"- {m.name}")
+                # 尝试不同的模型名称
+                model_candidates = [
+                    "gemini-pro",
+                    "models/gemini-pro",
+                    "gemini-1.0-pro",
+                    "gemini-1.0-pro-001",
+                    "text-bison-001",  # 旧版模型，可能仍然可用
+                    "models/text-bison-001"
+                ]
+                
+                selected_model = None
+                for candidate in model_candidates:
+                    if any(candidate in model for model in available_models):
+                        selected_model = candidate
+                        break
+                
+                if not selected_model:
+                    # 使用第一个可用的模型
+                    selected_model = available_models[0].split('/')[-1]  # 只取模型名称部分
+                
+                st.info(f"Using model: {selected_model}")
+                
+                # 创建模型实例
+                try:
+                    model = genai.GenerativeModel(selected_model)
+                except:
+                    # 如果失败，尝试带完整路径
+                    if "models/" not in selected_model:
+                        model = genai.GenerativeModel(f"models/{selected_model}")
+                    else:
+                        raise
                 
                 prompt = """Generate exactly 5 multiple-choice questions about AI usage habits for students. 
                 Each question should have 4 options (A-D) and cover different aspects of AI usage including:
@@ -222,27 +272,25 @@ elif st.session_state.selected_module == "assessment":
                             if q.get('text') and len(q.get('options', [])) >= 4:
                                 valid_questions.append({
                                     'text': q['text'],
-                                    'options': q['options'][:4]  # Take only first 4 options
+                                    'options': q['options'][:4]
                                 })
                         
                         if len(valid_questions) >= 3:
                             st.session_state.habit_questions = valid_questions[:5]
                             st.rerun()
                         else:
-                            st.error(f"Could not parse enough valid questions. Found {len(valid_questions)} questions with proper format.")
+                            st.error(f"Could not parse enough valid questions. Found {len(valid_questions)} questions.")
                             st.text_area("Model Response:", response.text, height=200)
                 
             except Exception as e:
                 st.error(f"Failed to generate questions: {str(e)}")
                 st.info("""
-                **Troubleshooting steps:**
-                1. Ensure you have the latest library: `pip install -U google-generativeai`
-                2. Check your API key has access to Gemini models in Google AI Studio
-                3. Try alternative model names:
-                   - `gemini-pro`
-                   - `models/gemini-pro`
-                   - `gemini-1.0-pro`
-                4. Make sure API key is properly set in Streamlit secrets
+                **Steps to resolve:**
+                1. **Update library**: `pip install --upgrade google-generativeai`
+                2. **Check API key**: Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
+                3. **Ensure API is enabled**: You may need to enable the Gemini API
+                4. **Regional restrictions**: Some models may not be available in all regions
+                5. **Try Vertex AI**: If Gemini API doesn't work, consider using Vertex AI
                 """)
 
 # --- Personal Usage Report ---
