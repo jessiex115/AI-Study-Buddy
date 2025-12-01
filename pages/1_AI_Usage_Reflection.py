@@ -90,6 +90,7 @@ for i, module in enumerate(module_data):
 
 st.markdown("---")
 
+
 # --- Usage Experience Journal ---
 if st.session_state.selected_module == "experience":
     st.header("Usage Experience Journal")
@@ -142,6 +143,7 @@ if st.session_state.selected_module == "experience":
                 </div>
                 """, unsafe_allow_html=True)
 
+
 # --- Usage Habit Assessment ---
 elif st.session_state.selected_module == "assessment":
     st.header("Usage Habit Assessment")
@@ -150,9 +152,9 @@ elif st.session_state.selected_module == "assessment":
     if not st.session_state.habit_questions:
         st.info("Generate questions to begin your assessment.")
         
-        # 使用样本问题（避免API问题）
+        # Use sample issues (to avoid API problems)
         if st.button("Generate Assessment Questions"):
-            # 本地生成的样本问题
+            # Locally generated sample issues
             sample_questions = [
                 {
                     'text': "How often do you use AI tools for academic work?",
@@ -268,6 +270,7 @@ elif st.session_state.selected_module == "report":
     with st.container():
         st.subheader("Your Journal Entries Summary")
         if st.session_state.journal_entries:
+            # Display the most recent journal entry
             latest_entry = st.session_state.journal_entries[-1]
             st.markdown(f"""
             <div class="report-section">
@@ -278,28 +281,37 @@ elif st.session_state.selected_module == "report":
                 <p><strong>Total Entries:</strong> {len(st.session_state.journal_entries)}</p>
             </div>
             """, unsafe_allow_html=True)
+            
+            # Optional: Show all entries in an expander
+            with st.expander("View All Journal Entries"):
+                for idx, entry in enumerate(st.session_state.journal_entries):
+                    st.write(f"**Entry {idx+1} ({entry['date']}):**")
+                    st.write(f"Task: {entry['task']}")
+                    st.write(f"Tool: {entry['tool']}")
+                    st.write(f"Usage: {entry['usage']}")
+                    st.write("---")
         else:
             st.warning("No journal entries found. Complete the Usage Experience Journal first.")
 
     # Assessment Summary Section
-    if st.session_state.habit_questions:
+    if st.session_state.habit_questions and st.session_state.habit_questions:
         st.subheader("Your Assessment Results")
         
-        # Initialize scoring
+        # Initialize scoring variables
         total_score = 0
         max_possible_score = 0
         answered_questions = 0
         
-        # Display questions and answers
+        # Display each question and its answer with scoring
         for idx, question in enumerate(st.session_state.habit_questions):
             answer_key = f"q{idx}"
             if answer_key in st.session_state.user_answers and st.session_state.user_answers[answer_key]:
                 answer_text = st.session_state.user_answers[answer_key]
                 option_letter = answer_text[0] if answer_text else ""
                 
-                # Context-aware scoring
+                # Calculate score based on question type and answer
                 if "how often" in question['text'].lower() or "frequency" in question['text'].lower():
-                    # Frequency questions: A=0, B=1, C=2, D=3
+                    # Frequency questions: A=0, B=1, C=2, D=3 (more frequent = higher score)
                     score = ord(option_letter.upper()) - ord('A') if option_letter in ['A','B','C','D'] else 0
                 elif "feel" in question['text'].lower() or "ethical" in question['text'].lower():
                     # Ethical questions: Reverse score (A=3, B=2, C=1, D=0)
@@ -309,87 +321,262 @@ elif st.session_state.selected_module == "report":
                     score = 1
                 else:
                     # Default scoring: Middle options score more (A=1, B=2, C=2, D=1)
-                    score_map = {'A':1, 'B':2, 'C':2, 'D':1}
+                    score_map = {'A': 1, 'B': 2, 'C': 2, 'D': 1}
                     score = score_map.get(option_letter.upper(), 0)
                 
+                # Update totals
                 total_score += score
-                max_possible_score += 3  # max score per question
+                max_possible_score += 3  # Maximum score per question is 3
                 answered_questions += 1
                 
+                # Display question with answer and score
                 st.markdown(f"""
                 <p><strong>{idx+1}. {question['text']}</strong><br>
                 <em>Your answer:</em> {answer_text} (Score: {score}/3)</p>
                 """, unsafe_allow_html=True)
         
+        # Display overall assessment results
         if answered_questions > 0:
-            percentage = (total_score / max_possible_score) * 100
+            percentage = (total_score / max_possible_score) * 100 if max_possible_score > 0 else 0
             
             st.markdown("---")
-            st.metric("Your AI Usage Score", 
-                     f"{total_score}/{max_possible_score}",
-                     f"{percentage:.1f}%")
             
-            # Contextual interpretation
+            # Display score metric
+            col1, col2, col3 = st.columns([1, 1, 2])
+            with col1:
+                st.metric(
+                    "Your AI Usage Score", 
+                    f"{total_score}/{max_possible_score}"
+                )
+            with col2:
+                st.metric(
+                    "Percentage", 
+                    f"{percentage:.1f}%"
+                )
+            
+            # Contextual interpretation based on score
+            st.markdown("### Interpretation")
             if percentage >= 80:
-                st.success("Highly strategic AI user - You leverage AI effectively while maintaining academic integrity")
+                st.success("**Highly Strategic AI User** - You leverage AI effectively while maintaining academic integrity. You demonstrate advanced understanding of when and how to use AI tools appropriately.")
             elif percentage >= 60:
-                st.success("Balanced AI usage - Good mix of practical use and ethical consideration")
+                st.success("**Balanced AI Usage** - You have a good mix of practical AI use and ethical consideration. You're exploring AI's potential while maintaining critical thinking skills.")
             elif percentage >= 40:
-                st.info("Developing AI skills - Growing comfort with AI tools, room for more strategic use")
+                st.info("**Developing AI Skills** - You're growing more comfortable with AI tools, but there's room for more strategic and effective use. Consider exploring different applications.")
             elif percentage >= 20:
-                st.warning("Limited AI engagement - Could benefit from exploring more applications")
+                st.warning("**Limited AI Engagement** - You could benefit from exploring more AI applications. Consider how AI might help with specific learning challenges.")
             else:
-                st.warning("Novice AI user - Significant opportunity to learn about AI's educational potential")
+                st.warning("**Novice AI User** - Significant opportunity to learn about AI's educational potential. Start with simple tasks like brainstorming or research assistance.")
+            
+            # Additional insights based on patterns
+            if percentage < 40:
+                st.info("💡 **Tip**: Consider starting with AI tools for brainstorming or research to build confidence.")
+            elif percentage > 70:
+                st.info("💡 **Tip**: Share your effective AI usage strategies with peers who are just starting out.")
+                
         else:
-            st.warning("No answers submitted for assessment")
+            st.warning("No answers submitted for the assessment. Please complete the assessment first.")
+    elif st.session_state.habit_questions:
+        st.info("Assessment questions are available but no answers have been submitted yet.")
+    else:
+        st.info("Complete the Usage Habit Assessment to see your results here.")
+
+    # Generate AI-Powered Feedback Section
+    st.markdown("---")
+    st.subheader("Generate Personalized Feedback")
     
-    # Generate Feedback Section
-    if st.button("Generate Comprehensive Feedback", type="primary"):
-        if st.session_state.journal_entries or st.session_state.habit_questions:
+    # Check if there's enough data for analysis
+    has_journal_data = len(st.session_state.journal_entries) > 0
+    has_assessment_data = any(st.session_state.user_answers.values())
+    
+    if st.button("Generate Comprehensive Feedback", type="primary", use_container_width=True):
+        if has_journal_data or has_assessment_data:
             try:
+                # Configure the Gemini API
                 genai.configure(api_key=st.secrets["google"]["api_key"])
-                model = genai.GenerativeModel("gemini-1.5-flash")
                 
+                # Try different model names - use gemini-pro as it's more widely available
+                try:
+                    model = genai.GenerativeModel("gemini-pro")
+                except:
+                    # Fallback to other model names
+                    try:
+                        model = genai.GenerativeModel("models/gemini-pro")
+                    except:
+                        try:
+                            model = genai.GenerativeModel("gemini-1.0-pro")
+                        except Exception as model_error:
+                            st.error(f"Model error: {model_error}")
+                            # Use sample feedback if API fails
+                            st.subheader("Personalized Feedback Report (Sample)")
+                            st.markdown("""
+                            **Usage Patterns Analysis:**
+                            Based on your journal entries and assessment responses, you're exploring various AI tools for academic tasks.
+                            
+                            **Strengths in AI Utilization:**
+                            - You're actively experimenting with different AI applications
+                            - Showing awareness of ethical considerations
+                            
+                            **Areas for Improvement:**
+                            - Consider more strategic integration of AI in your workflow
+                            - Explore specific tools for different types of tasks
+                            
+                            **Recommended Strategies:**
+                            1. Create a weekly plan for AI-assisted learning
+                            2. Try different AI tools for specific purposes
+                            3. Reflect on what works best for your learning style
+                            
+                            **Suggested Tools and Resources:**
+                            - ChatGPT for brainstorming
+                            - Grammarly for writing assistance
+                            - Wolfram Alpha for computational tasks
+                            """)
+                            return
+                
+                # Prepare journal context for the prompt
                 journal_context = "\n".join(
-                    f"Entry {idx+1} ({entry['date']}): Task: {entry['task']}, Tool: {entry['tool']}, Usage: {entry['usage']}"
-                    for idx, entry in enumerate(st.session_state.journal_entries)
-                ) if st.session_state.journal_entries else "No journal entries available"
+                    f"Entry {idx+1} ({entry['date']}):\nTask: {entry['task']}\nTool: {entry['tool']}\nUsage: {entry['usage']}\n---"
+                    for idx, entry in enumerate(st.session_state.journal_entries[-5:])  # Limit to last 5 entries
+                ) if has_journal_data else "No journal entries available"
                 
+                # Prepare assessment context for the prompt
                 assessment_context = "\n".join(
-                    f"Q: {q['text']}\nA: {st.session_state.user_answers.get(f'q{i}', 'Not answered')}"
+                    f"Q{i+1}: {q['text']}\nA: {st.session_state.user_answers.get(f'q{i}', 'Not answered')}\n---"
                     for i, q in enumerate(st.session_state.habit_questions)
-                ) if st.session_state.habit_questions else "No assessment answers available"
+                    if f'q{i}' in st.session_state.user_answers
+                ) if has_assessment_data else "No assessment answers available"
                 
+                # Create the prompt for the AI
                 prompt = f"""
-                Based on the following user data, provide a comprehensive AI usage analysis:
+                Analyze this student's AI usage patterns and provide personalized feedback:
                 
-                JOURNAL ENTRIES:
+                JOURNAL ENTRIES (most recent):
                 {journal_context}
                 
-                ASSESSMENT ANSWERS:
+                ASSESSMENT RESPONSES:
                 {assessment_context}
                 
-                Please structure your response with these sections:
-                1. Usage Patterns Analysis
-                2. Strengths in AI Utilization
-                3. Areas for Improvement
-                4. Recommended Strategies
-                5. Suggested Tools and Resources
+                Please provide a comprehensive analysis with these sections:
                 
-                Keep the tone professional yet accessible, and provide specific, actionable recommendations.
+                1. **Usage Patterns Analysis**
+                   - Identify trends in how they use AI
+                   - Note frequency and types of tasks
+                
+                2. **Strengths in AI Utilization**
+                   - Highlight what they're doing well
+                   - Note positive habits and approaches
+                
+                3. **Areas for Improvement**
+                   - Suggest specific areas to develop
+                   - Identify potential blind spots
+                
+                4. **Recommended Strategies**
+                   - Provide 3-5 actionable recommendations
+                   - Suggest specific next steps
+                
+                5. **Suggested Tools and Resources**
+                   - Recommend specific AI tools for their needs
+                   - Suggest learning resources
+                
+                Tone: Professional, encouraging, and constructive
+                Length: Approximately 300-400 words
+                Focus: On practical, actionable advice
                 """
                 
-                with st.spinner("Analyzing your usage patterns..."):
+                with st.spinner("Analyzing your usage patterns and generating feedback..."):
                     response = model.generate_content(prompt)
-                    if response.text:
+                    
+                    if response and response.text:
                         st.subheader("Personalized Feedback Report")
-                        st.markdown(response.text)
+                        
+                        # Display the feedback in a nicely formatted container
+                        st.markdown(f"""
+                        <div style="
+                            background-color: #f8f9fa;
+                            padding: 20px;
+                            border-radius: 10px;
+                            border-left: 5px solid #4CAF50;
+                            margin: 20px 0;
+                        ">
+                        {response.text}
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        # Add download option
+                        feedback_text = f"AI Usage Feedback Report\nGenerated on: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n{response.text}"
+                        st.download_button(
+                            label="📥 Download Feedback Report",
+                            data=feedback_text,
+                            file_name=f"ai_usage_feedback_{datetime.now().strftime('%Y%m%d')}.txt",
+                            mime="text/plain"
+                        )
                     else:
-                        st.error("Could not generate feedback. Please try again.")
+                        st.error("The AI model did not return any feedback. Please try again.")
+                        
             except Exception as e:
-                st.error(f"An error occurred: {str(e)}")
+                st.error(f"An error occurred while generating feedback: {str(e)}")
+                st.info("""
+                **Troubleshooting tips:**
+                1. Ensure your API key is valid and has access to Gemini models
+                2. Try updating the library: `pip install --upgrade google-generativeai`
+                3. Check if the model name needs to be updated
+                4. Consider using the sample feedback option below
+                """)
+                
+                # Provide sample feedback as fallback
+                if st.button("Show Sample Feedback Instead"):
+                    display_sample_feedback()
         else:
             st.warning("Please complete at least one module (Journal or Assessment) before generating feedback.")
+            
+    # Optional: Add a refresh button
+    if st.session_state.journal_entries or st.session_state.user_answers:
+        st.markdown("---")
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Refresh Report Data"):
+                st.rerun()
+        with col2:
+            if st.button("Clear All Data"):
+                st.session_state.journal_entries = []
+                st.session_state.habit_questions = []
+                st.session_state.user_answers = {}
+                st.success("All data cleared successfully!")
+                st.rerun()
 
 else:
     st.info("Please select a module from the options above to begin your reflection.")
+
+
+# Helper function for sample feedback
+def display_sample_feedback():
+    """Display sample feedback when API is not available"""
+    st.subheader("Personalized Feedback Report (Sample)")
+    st.markdown("""
+    ### Usage Patterns Analysis
+    Based on your usage patterns, you're in the early stages of exploring AI tools for academic work. 
+    You're primarily using AI for basic tasks and are developing an understanding of how these tools can support your learning.
+    
+    ### Strengths in AI Utilization
+    - **Exploratory Mindset**: You're willing to try different AI tools and applications
+    - **Ethical Awareness**: You show consideration for responsible AI use
+    - **Task-Specific Applications**: You're beginning to match tools to specific learning needs
+    
+    ### Areas for Improvement
+    - **Integration Strategy**: Consider how AI can be more systematically integrated into your workflow
+    - **Advanced Features**: Explore beyond basic usage to discover more powerful features
+    - **Critical Evaluation**: Develop stronger skills in evaluating AI-generated content
+    
+    ### Recommended Strategies
+    1. **Create an AI Learning Plan**: Dedicate specific times each week to explore new AI tools
+    2. **Tool Specialization**: Identify 2-3 AI tools that work best for your specific subjects
+    3. **Peer Learning**: Join or create a study group focused on effective AI usage
+    4. **Reflection Practice**: Keep a weekly log of what AI strategies worked best
+    
+    ### Suggested Tools and Resources
+    - **For Writing**: Grammarly, Hemingway Editor, ChatGPT for brainstorming
+    - **For Research**: Consensus, Elicit, Google Scholar with AI assistance
+    - **For Coding**: GitHub Copilot, Replit, Codeium
+    - **Learning Resources**: Coursera's "AI for Everyone", edX AI courses, AI tool tutorials on YouTube
+    
+    **Next Steps**: Try one new AI tool this week and reflect on how it affected your productivity.
+    """)
