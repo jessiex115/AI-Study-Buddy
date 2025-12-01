@@ -22,11 +22,11 @@ Reference: Long, D., & Magerko, B. (2020). What is AI literacy? competencies and
 - ✍️ **AI Usage Reflection** – Reflect on your personal AI usage and receive personalized feedback.  
 - 🎯 **AI Challenges & Activities** – Engage in practical exercises to strengthen AI literacy.  
 - 💬 **AI Community Forum** – Share insights, ask questions, and learn from peers.  
-- ⚡ **Dynamic AI Support** – Integrates **Google Gemini 1.5 Flash API** to generate AI usage assessment questions and personalized advice.  
+- ⚡ **Dynamic AI Support** – Integrates **Google gemini-2.0-flash API** to generate AI usage assessment questions and personalized advice.  
 
 ---
 
 ## Tech Stack  
 - **Python**  
 - **Streamlit** – for building a clean and interactive web interface  
-- **Google gemini-2.0-flash** – for dynamic question generation & personalized recommendations  
+- **Google gemini-2.0-flash API** – for dynamic question generation & personalized recommendations  
