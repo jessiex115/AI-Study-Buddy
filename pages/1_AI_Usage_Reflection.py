@@ -149,112 +149,80 @@ elif st.session_state.selected_module == "assessment":
     
     if not st.session_state.habit_questions:
         st.info("Generate questions to begin your assessment.")
-        
-        # 使用样本问题（避免API问题）
         if st.button("Generate Assessment Questions"):
-            # 本地生成的样本问题
-            sample_questions = [
-                {
-                    'text': "How often do you use AI tools for academic work?",
-                    'options': [
-                        "A. Never",
-                        "B. Rarely (1-2 times per week)",
-                        "C. Regularly (3-5 times per week)",
-                        "D. Daily"
-                    ]
-                },
-                {
-                    'text': "Which type of tasks do you most commonly use AI for?",
-                    'options': [
-                        "A. Brainstorming ideas",
-                        "B. Writing assistance",
-                        "C. Research and information gathering",
-                        "D. Problem solving and analysis"
-                    ]
-                },
-                {
-                    'text': "How do you feel about using AI for academic work?",
-                    'options': [
-                        "A. It's essential for my learning",
-                        "B. It's helpful but I use it cautiously",
-                        "C. I prefer traditional methods",
-                        "D. I'm concerned about over-reliance"
-                    ]
-                },
-                {
-                    'text': "When using AI, how often do you verify the information provided?",
-                    'options': [
-                        "A. Always - I check multiple sources",
-                        "B. Usually - for important information",
-                        "C. Sometimes - if I have doubts",
-                        "D. Rarely - I trust the AI's output"
-                    ]
-                },
-                {
-                    'text': "How has AI usage affected your learning process?",
-                    'options': [
-                        "A. Greatly improved efficiency",
-                        "B. Some improvements with some concerns",
-                        "C. Mixed results - helpful but distracting",
-                        "D. Negative impact - reduced my own thinking"
-                    ]
-                }
-            ]
-            
-            st.session_state.habit_questions = sample_questions
-            st.rerun()
-    
+            try:
+                genai.configure(api_key=st.secrets["google"]["api_key"])
+                model = genai.GenerativeModel("gemini-1.5-flash")
+                
+                prompt = """Generate exactly 5 multiple-choice questions about AI usage habits for students. 
+                Each question should have 4 options (A-D) and cover different aspects of AI usage including:
+                - Frequency of use
+                - Types of tasks
+                - Ethical considerations
+                - Learning effectiveness
+                
+                Format each question like this example:
+                Question: How often do you use AI tools for academic work?
+                A. Never
+                B. Rarely (1-2 times per week)
+                C. Regularly (3-5 times per week)
+                D. Daily"""
+                
+                with st.spinner("Generating personalized questions..."):
+                    response = model.generate_content(prompt)
+                    
+                    if response.text:
+                        questions = []
+                        current_question = {}
+                        
+                        for line in response.text.split('\n'):
+                            line = line.strip()
+                            if line.startswith("Question:"):
+                                if current_question:
+                                    questions.append(current_question)
+                                current_question = {
+                                    'text': line.replace("Question:", "").strip(),
+                                    'options': []
+                                }
+                            elif line and line[0] in ['A', 'B', 'C', 'D']:
+                                current_question['options'].append(line)
+                        
+                        if current_question:
+                            questions.append(current_question)
+                        
+                        st.session_state.habit_questions = questions[:5]
+                        st.rerun()
+                
+            except Exception as e:
+                st.error(f"Failed to generate questions: {str(e)}")
     else:
         with st.form("assessment_form"):
             st.write("**Please answer the following questions:**")
             
             for idx, question in enumerate(st.session_state.habit_questions):
                 with st.container():
-                    st.markdown(f"<div class='question-card'><strong>Question {idx+1}: {question['text']}</strong></div>", unsafe_allow_html=True)
+                    st.markdown(f"<div class='question-card'><strong>{idx+1}. {question['text']}</strong></div>", 
+                               unsafe_allow_html=True)
                     
                     answer_key = f"q{idx}"
-                    
-                    # Extract option texts
-                    options_display = []
-                    for opt in question['options']:
-                        if ". " in opt:
-                            options_display.append(opt)
-                        else:
-                            option_letter = ['A', 'B', 'C', 'D'][len(options_display)]
-                            options_display.append(f"{option_letter}. {opt}")
-                    
-                    # Store selected answer
-                    selected_option = st.radio(
+                    options = [opt.split(". ", 1)[1] if ". " in opt else opt for opt in question['options']]
+                    st.session_state.user_answers[answer_key] = st.radio(
                         "Select your answer:",
-                        options_display,
+                        options,
                         key=answer_key,
-                        index=None,
-                        label_visibility="collapsed"
+                        index=None
                     )
-                    
-                    if selected_option:
-                        st.session_state.user_answers[answer_key] = selected_option
             
             col1, col2 = st.columns(2)
             with col1:
                 submitted = st.form_submit_button("Submit Assessment")
                 if submitted:
-                    unanswered = [k for k, v in st.session_state.user_answers.items() if not v]
-                    if not unanswered:
-                        st.success("✅ Assessment submitted successfully!")
-                        
-                        # Display results summary
-                        with st.expander("View Your Responses"):
-                            for idx, question in enumerate(st.session_state.habit_questions):
-                                answer_key = f"q{idx}"
-                                st.write(f"**Q{idx+1}: {question['text']}**")
-                                st.write(f"Your answer: {st.session_state.user_answers.get(answer_key, 'Not answered')}")
-                                st.write("---")
+                    if all(st.session_state.user_answers.values()):
+                        st.success("Assessment submitted successfully!")
                     else:
-                        st.warning(f"Please answer {len(unanswered)} remaining question(s).")
-            
+                        st.warning("Please answer all questions before submitting.")
             with col2:
-                if st.form_submit_button("🔄 Reset Assessment"):
+                if st.form_submit_button("Reset Assessment"):
                     st.session_state.habit_questions = []
                     st.session_state.user_answers = {}
                     st.rerun()
@@ -284,19 +252,19 @@ elif st.session_state.selected_module == "report":
     # Assessment Summary Section
     if st.session_state.habit_questions:
         st.subheader("Your Assessment Results")
-        
+    
         # Initialize scoring
         total_score = 0
         max_possible_score = 0
         answered_questions = 0
-        
+    
         # Display questions and answers
         for idx, question in enumerate(st.session_state.habit_questions):
             answer_key = f"q{idx}"
             if answer_key in st.session_state.user_answers and st.session_state.user_answers[answer_key]:
                 answer_text = st.session_state.user_answers[answer_key]
                 option_letter = answer_text[0] if answer_text else ""
-                
+            
                 # Context-aware scoring
                 if "how often" in question['text'].lower() or "frequency" in question['text'].lower():
                     # Frequency questions: A=0, B=1, C=2, D=3
@@ -311,24 +279,24 @@ elif st.session_state.selected_module == "report":
                     # Default scoring: Middle options score more (A=1, B=2, C=2, D=1)
                     score_map = {'A':1, 'B':2, 'C':2, 'D':1}
                     score = score_map.get(option_letter.upper(), 0)
-                
+            
                 total_score += score
                 max_possible_score += 3  # max score per question
                 answered_questions += 1
-                
+            
                 st.markdown(f"""
                 <p><strong>{idx+1}. {question['text']}</strong><br>
                 <em>Your answer:</em> {answer_text} (Score: {score}/3)</p>
                 """, unsafe_allow_html=True)
-        
+    
         if answered_questions > 0:
             percentage = (total_score / max_possible_score) * 100
-            
+        
             st.markdown("---")
             st.metric("Your AI Usage Score", 
-                     f"{total_score}/{max_possible_score}",
-                     f"{percentage:.1f}%")
-            
+                    f"{total_score}/{max_possible_score}",
+                    f"{percentage:.1f}%")
+        
             # Contextual interpretation
             if percentage >= 80:
                 st.success("Highly strategic AI user - You leverage AI effectively while maintaining academic integrity")
