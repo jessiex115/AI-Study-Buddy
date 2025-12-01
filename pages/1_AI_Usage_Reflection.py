@@ -148,87 +148,145 @@ elif st.session_state.selected_module == "assessment":
     st.markdown("Evaluate your patterns and habits when using AI for learning.")
     
     if not st.session_state.habit_questions:
-        st.info("Generate questions to begin your assessment.")
-        if st.button("Generate Assessment Questions"):
-            try:
-                # Configure API with your key
-                genai.configure(api_key=st.secrets["google"]["api_key"])
+    st.info("Generate questions to begin your assessment.")
+    if st.button("Generate Assessment Questions"):
+        try:
+            # Configure API with your key
+            genai.configure(api_key=st.secrets["google"]["api_key"])
 
-                # Use a working model that supports generate_content
-                model = genai.GenerativeModel("models/text-bison-001")
+            # Use Gemini model - updated from text-bison-001
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            
+            prompt = """Generate exactly 5 multiple-choice questions about AI usage habits for students. 
+            Each question should have 4 options (A-D) and cover different aspects of AI usage including:
+            - Frequency of use
+            - Types of tasks
+            - Ethical considerations
+            - Learning effectiveness
+            - Dependence on AI
+            - Critical thinking development
+            
+            Format each question like this example:
+            Question: How often do you use AI tools for academic work?
+            A. Never
+            B. Rarely (1-2 times per week)
+            C. Regularly (3-5 times per week)
+            D. Daily
+            
+            IMPORTANT: 
+            1. Always start questions with "Question:"
+            2. Options must start with A., B., C., D.
+            3. Generate exactly 5 questions"""
+            
+            with st.spinner("Generating personalized questions..."):
+                response = model.generate_content(prompt)
                 
-                prompt = """Generate exactly 5 multiple-choice questions about AI usage habits for students. 
-                Each question should have 4 options (A-D) and cover different aspects of AI usage including:
-                - Frequency of use
-                - Types of tasks
-                - Ethical considerations
-                - Learning effectiveness
-                
-                Format each question like this example:
-                Question: How often do you use AI tools for academic work?
-                A. Never
-                B. Rarely (1-2 times per week)
-                C. Regularly (3-5 times per week)
-                D. Daily"""
-                
-                with st.spinner("Generating personalized questions..."):
-                    response = model.generate_content(prompt)
+                if response.text:
+                    questions = []
+                    current_question = {}
                     
-                    if response.text:
-                        questions = []
-                        current_question = {}
-                        
-                        for line in response.text.split('\n'):
-                            line = line.strip()
-                            if line.startswith("Question:"):
-                                if current_question:
-                                    questions.append(current_question)
-                                current_question = {
-                                    'text': line.replace("Question:", "").strip(),
-                                    'options': []
-                                }
-                            elif line and line[0] in ['A', 'B', 'C', 'D']:
-                                current_question['options'].append(line)
-                        
-                        if current_question:
-                            questions.append(current_question)
-                        
-                        st.session_state.habit_questions = questions[:5]
+                    # Parse the response
+                    lines = response.text.strip().split('\n')
+                    
+                    for line in lines:
+                        line = line.strip()
+                        if line.startswith("Question:"):
+                            if current_question:
+                                questions.append(current_question)
+                            current_question = {
+                                'text': line.replace("Question:", "").strip(),
+                                'options': []
+                            }
+                        elif line and len(line) > 2 and line[0] in ['A', 'B', 'C', 'D'] and line[1] == '.':
+                            current_question['options'].append(line)
+                    
+                    if current_question:
+                        questions.append(current_question)
+                    
+                    # Ensure we have exactly 5 questions
+                    if len(questions) > 5:
+                        questions = questions[:5]
+                    
+                    # Validate each question has 4 options
+                    valid_questions = []
+                    for q in questions:
+                        if q.get('text') and len(q.get('options', [])) >= 4:
+                            valid_questions.append({
+                                'text': q['text'],
+                                'options': q['options'][:4]  # Take only first 4 options
+                            })
+                    
+                    if len(valid_questions) >= 3:
+                        st.session_state.habit_questions = valid_questions[:5]
                         st.rerun()
-                
-            except Exception as e:
-                st.error(f"Failed to generate questions: {str(e)}")
-    else:
-        with st.form("assessment_form"):
-            st.write("**Please answer the following questions:**")
-            
-            for idx, question in enumerate(st.session_state.hbit_questions):
-                with st.container():
-                    st.markdown(f"<div class='question-card'><strong>{idx+1}. {question['text']}</strong></div>", 
-                               unsafe_allow_html=True)
-                    
-                    answer_key = f"q{idx}"
-                    options = [opt.split(". ", 1)[1] if ". " in opt else opt for opt in question['options']]
-                    st.session_state.user_answers[answer_key] = st.radio(
-                        "Select your answer:",
-                        options,
-                        key=answer_key,
-                        index=None
-                    )
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                submitted = st.form_submit_button("Submit Assessment")
-                if submitted:
-                    if all(st.session_state.user_answers.values()):
-                        st.success("Assessment submitted successfully!")
                     else:
-                        st.warning("Please answer all questions before submitting.")
-            with col2:
-                if st.form_submit_button("Reset Assessment"):
-                    st.session_state.habit_questions = []
-                    st.session_state.user_answers = {}
-                    st.rerun()
+                        st.error(f"Could not parse enough valid questions. Found {len(valid_questions)} questions with proper format.")
+                        st.text_area("Model Response:", response.text, height=200)
+            
+        except Exception as e:
+            st.error(f"Failed to generate questions: {str(e)}")
+            st.info("""
+            Troubleshooting steps:
+            1. Ensure you have the latest library: `pip install -U google-generativeai`
+            2. Check your API key has access to Gemini models
+            3. Try alternative model: `gemini-pro` or `gemini-1.5-pro`
+            """)
+else:
+    with st.form("assessment_form"):
+        st.write("**Please answer the following questions:**")
+        
+        for idx, question in enumerate(st.session_state.habit_questions):
+            with st.container():
+                st.markdown(f"<div class='question-card'><strong>Question {idx+1}: {question['text']}</strong></div>", 
+                           unsafe_allow_html=True)
+                
+                answer_key = f"q{idx}"
+                
+                # Extract option texts
+                options_display = []
+                for opt in question['options']:
+                    if ". " in opt:
+                        options_display.append(opt)
+                    else:
+                        # Add letter prefix if missing
+                        option_letter = ['A', 'B', 'C', 'D'][len(options_display)]
+                        options_display.append(f"{option_letter}. {opt}")
+                
+                # Store selected answer
+                selected_option = st.radio(
+                    "Select your answer:",
+                    options_display,
+                    key=answer_key,
+                    index=None,
+                    label_visibility="collapsed"
+                )
+                
+                if selected_option:
+                    st.session_state.user_answers[answer_key] = selected_option
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            submitted = st.form_submit_button("Submit Assessment")
+            if submitted:
+                unanswered = [k for k, v in st.session_state.user_answers.items() if not v]
+                if not unanswered:
+                    st.success("✅ Assessment submitted successfully!")
+                    
+                    # Display results summary
+                    with st.expander("View Your Responses"):
+                        for idx, question in enumerate(st.session_state.habit_questions):
+                            answer_key = f"q{idx}"
+                            st.write(f"**Q{idx+1}: {question['text']}**")
+                            st.write(f"Your answer: {st.session_state.user_answers.get(answer_key, 'Not answered')}")
+                            st.write("---")
+                else:
+                    st.warning(f"Please answer {len(unanswered)} remaining question(s).")
+        
+        with col2:
+            if st.form_submit_button("🔄 Reset Assessment"):
+                st.session_state.habit_questions = []
+                st.session_state.user_answers = {}
+                st.rerun()
 
 # --- Personal Usage Report ---
 elif st.session_state.selected_module == "report":
