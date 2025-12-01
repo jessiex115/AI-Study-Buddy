@@ -150,177 +150,67 @@ elif st.session_state.selected_module == "assessment":
     if not st.session_state.habit_questions:
         st.info("Generate questions to begin your assessment.")
         
-        # 提供两个选项：API生成或本地样本
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            if st.button("Generate with Gemini AI", type="primary"):
-                try:
-                    # Configure API with your key
-                    genai.configure(api_key=st.secrets["google"]["api_key"])
-                    
-                    # 首先尝试列出可用模型
-                    try:
-                        models = list(genai.list_models())
-                        available_model_names = [m.name for m in models]
-                        st.info(f"Found {len(available_model_names)} models")
-                        
-                        # 寻找合适的模型
-                        model_to_use = None
-                        for model_name in available_model_names:
-                            if "gemini" in model_name.lower() and "generateContent" in models[available_model_names.index(model_name)].supported_generation_methods:
-                                model_to_use = model_name
-                                break
-                        
-                        if not model_to_use:
-                            # 如果没有Gemini，找其他可用的
-                            for model_name in available_model_names:
-                                if "generateContent" in models[available_model_names.index(model_name)].supported_generation_methods:
-                                    model_to_use = model_name
-                                    break
-                        
-                        if model_to_use:
-                            st.info(f"Using model: {model_to_use}")
-                            model = genai.GenerativeModel(model_to_use)
-                        else:
-                            st.error("No suitable model found")
-                            return
-                            
-                    except Exception as model_error:
-                        st.error(f"Error checking models: {model_error}")
-                        # 直接尝试gemini-pro
-                        model = genai.GenerativeModel("gemini-pro")
-                    
-                    prompt = """Generate exactly 5 multiple-choice questions about AI usage habits for students. 
-                    Each question should have 4 options (A-D) and cover different aspects of AI usage including:
-                    - Frequency of use
-                    - Types of tasks
-                    - Ethical considerations
-                    - Learning effectiveness
-                    
-                    Format each question like this example:
-                    Question: How often do you use AI tools for academic work?
-                    A. Never
-                    B. Rarely (1-2 times per week)
-                    C. Regularly (3-5 times per week)
-                    D. Daily
-                    
-                    Provide exactly 5 questions, each starting with 'Question:' and with 4 options A-D."""
-                    
-                    with st.spinner("Generating questions with AI..."):
-                        response = model.generate_content(prompt)
-                        
-                        if response.text:
-                            questions = []
-                            lines = response.text.strip().split('\n')
-                            current_question = {}
-                            
-                            for line in lines:
-                                line = line.strip()
-                                if line.startswith("Question:"):
-                                    if current_question:
-                                        questions.append(current_question)
-                                    current_question = {
-                                        'text': line.replace("Question:", "").strip(),
-                                        'options': []
-                                    }
-                                elif line and line[0] in ['A', 'B', 'C', 'D'] and len(line) > 2 and line[1] == '.':
-                                    current_question['options'].append(line)
-                            
-                            if current_question:
-                                questions.append(current_question)
-                            
-                            # 确保我们有有效的问题
-                            valid_questions = []
-                            for q in questions:
-                                if q.get('text') and len(q.get('options', [])) >= 4:
-                                    valid_questions.append({
-                                        'text': q['text'],
-                                        'options': q['options'][:4]
-                                    })
-                            
-                            if valid_questions:
-                                st.session_state.habit_questions = valid_questions[:5]
-                                st.rerun()
-                            else:
-                                st.error("Could not parse questions from AI response.")
-                                st.text_area("AI Response:", response.text, height=200)
-                        else:
-                            st.error("No response received from AI model.")
-                
-                except Exception as e:
-                    st.error(f"Failed to generate questions: {str(e)}")
-                    st.info("""
-                    **Troubleshooting:**
-                    1. Update library: `pip install -U google-generativeai`
-                    2. Check API key at [Google AI Studio](https://makersuite.google.com/app/apikey)
-                    3. Ensure Gemini API is enabled in your Google Cloud project
-                    """)
-        
-        with col2:
-            if st.button("Use Sample Questions"):
-                # 本地生成的样本问题（不需要API）
-                sample_questions = [
-                    {
-                        'text': "How often do you use AI tools for academic work?",
-                        'options': [
-                            "A. Never",
-                            "B. Rarely (1-2 times per week)",
-                            "C. Regularly (3-5 times per week)",
-                            "D. Daily"
-                        ]
-                    },
-                    {
-                        'text': "Which type of tasks do you most commonly use AI for?",
-                        'options': [
-                            "A. Brainstorming ideas",
-                            "B. Writing assistance",
-                            "C. Research and information gathering",
-                            "D. Problem solving and analysis"
-                        ]
-                    },
-                    {
-                        'text': "How do you feel about using AI for academic work?",
-                        'options': [
-                            "A. It's essential for my learning",
-                            "B. It's helpful but I use it cautiously",
-                            "C. I prefer traditional methods",
-                            "D. I'm concerned about over-reliance"
-                        ]
-                    },
-                    {
-                        'text': "When using AI, how often do you verify the information provided?",
-                        'options': [
-                            "A. Always - I check multiple sources",
-                            "B. Usually - for important information",
-                            "C. Sometimes - if I have doubts",
-                            "D. Rarely - I trust the AI's output"
-                        ]
-                    },
-                    {
-                        'text': "How has AI usage affected your learning process?",
-                        'options': [
-                            "A. Greatly improved efficiency",
-                            "B. Some improvements with some concerns",
-                            "C. Mixed results - helpful but distracting",
-                            "D. Negative impact - reduced my own thinking"
-                        ]
-                    }
-                ]
-                
-                st.session_state.habit_questions = sample_questions
-                st.success("Sample questions loaded successfully!")
-                st.rerun()
+        # 使用样本问题（避免API问题）
+        if st.button("Generate Assessment Questions"):
+            # 本地生成的样本问题
+            sample_questions = [
+                {
+                    'text': "How often do you use AI tools for academic work?",
+                    'options': [
+                        "A. Never",
+                        "B. Rarely (1-2 times per week)",
+                        "C. Regularly (3-5 times per week)",
+                        "D. Daily"
+                    ]
+                },
+                {
+                    'text': "Which type of tasks do you most commonly use AI for?",
+                    'options': [
+                        "A. Brainstorming ideas",
+                        "B. Writing assistance",
+                        "C. Research and information gathering",
+                        "D. Problem solving and analysis"
+                    ]
+                },
+                {
+                    'text': "How do you feel about using AI for academic work?",
+                    'options': [
+                        "A. It's essential for my learning",
+                        "B. It's helpful but I use it cautiously",
+                        "C. I prefer traditional methods",
+                        "D. I'm concerned about over-reliance"
+                    ]
+                },
+                {
+                    'text': "When using AI, how often do you verify the information provided?",
+                    'options': [
+                        "A. Always - I check multiple sources",
+                        "B. Usually - for important information",
+                        "C. Sometimes - if I have doubts",
+                        "D. Rarely - I trust the AI's output"
+                    ]
+                },
+                {
+                    'text': "How has AI usage affected your learning process?",
+                    'options': [
+                        "A. Greatly improved efficiency",
+                        "B. Some improvements with some concerns",
+                        "C. Mixed results - helpful but distracting",
+                        "D. Negative impact - reduced my own thinking"
+                    ]
+                }
+            ]
+            
+            st.session_state.habit_questions = sample_questions
+            st.rerun()
     
     else:
-        # 显示问题和表单（这部分保持不变）
         with st.form("assessment_form"):
             st.write("**Please answer the following questions:**")
             
             for idx, question in enumerate(st.session_state.habit_questions):
                 with st.container():
-                    st.markdown(f"<div class='question-card'><strong>Question {idx+1}: {question['text']}</strong></div>", 
-                               unsafe_allow_html=True)
+                    st.markdown(f"<div class='question-card'><strong>Question {idx+1}: {question['text']}</strong></div>", unsafe_allow_html=True)
                     
                     answer_key = f"q{idx}"
                     
