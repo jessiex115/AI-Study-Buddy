@@ -153,9 +153,18 @@ elif st.session_state.selected_module == "assessment":
             try:
                 # Configure API with your key
                 genai.configure(api_key=st.secrets["google"]["api_key"])
-
-                # Use Gemini model - updated from text-bison-001
-                model = genai.GenerativeModel("gemini-1.5-flash")
+                
+                # OPTION 1: 尝试 gemini-pro（最通用）
+                model = genai.GenerativeModel("gemini-pro")
+                
+                # OPTION 2: 或者尝试完整的模型路径
+                # model = genai.GenerativeModel("models/gemini-pro")
+                
+                # OPTION 3: 列出所有可用模型以查看正确的名称
+                # st.write("Available models:")
+                # for m in genai.list_models():
+                #     if "generateContent" in m.supported_generation_methods:
+                #         st.write(f"- {m.name}")
                 
                 prompt = """Generate exactly 5 multiple-choice questions about AI usage habits for students. 
                 Each question should have 4 options (A-D) and cover different aspects of AI usage including:
@@ -226,80 +235,15 @@ elif st.session_state.selected_module == "assessment":
             except Exception as e:
                 st.error(f"Failed to generate questions: {str(e)}")
                 st.info("""
-                Troubleshooting steps:
+                **Troubleshooting steps:**
                 1. Ensure you have the latest library: `pip install -U google-generativeai`
-                2. Check your API key has access to Gemini models
-                3. Try alternative model: `gemini-pro` or `gemini-1.5-pro`
+                2. Check your API key has access to Gemini models in Google AI Studio
+                3. Try alternative model names:
+                   - `gemini-pro`
+                   - `models/gemini-pro`
+                   - `gemini-1.0-pro`
+                4. Make sure API key is properly set in Streamlit secrets
                 """)
-    else:
-        with st.form("assessment_form"):
-            st.write("**Please answer the following questions:**")
-            
-            for idx, question in enumerate(st.session_state.habit_questions):
-                with st.container():
-                    st.markdown(f"<div class='question-card'><strong>Question {idx+1}: {question['text']}</strong></div>", 
-                               unsafe_allow_html=True)
-                    
-                    answer_key = f"q{idx}"
-                    
-                    # Extract option texts
-                    options_display = []
-                    for opt in question['options']:
-                        if ". " in opt:
-                            options_display.append(opt)
-                        else:
-                            # Add letter prefix if missing
-                            option_letter = ['A', 'B', 'C', 'D'][len(options_display)]
-                            options_display.append(f"{option_letter}. {opt}")
-                    
-                    # Store selected answer
-                    selected_option = st.radio(
-                        "Select your answer:",
-                        options_display,
-                        key=answer_key,
-                        index=None,
-                        label_visibility="collapsed"
-                    )
-                    
-                    if selected_option:
-                        st.session_state.user_answers[answer_key] = selected_option
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                submitted = st.form_submit_button("Submit Assessment")
-                if submitted:
-                    unanswered = [k for k, v in st.session_state.user_answers.items() if not v]
-                    if not unanswered:
-                        st.success("✅ Assessment submitted successfully!")
-                        
-                        # Display results summary
-                        with st.expander("View Your Responses"):
-                            for idx, question in enumerate(st.session_state.habit_questions):
-                                answer_key = f"q{idx}"
-                                st.write(f"**Q{idx+1}: {question['text']}**")
-                                st.write(f"Your answer: {st.session_state.user_answers.get(answer_key, 'Not answered')}")
-                                st.write("---")
-                    else:
-                        st.warning(f"Please answer {len(unanswered)} remaining question(s).")
-            
-            with col2:
-                if st.form_submit_button("🔄 Reset Assessment"):
-                    st.session_state.habit_questions = []
-                    st.session_state.user_answers = {}
-                    st.rerun()
-    
-    # Add CSS styling (moved inside the elif block)
-    st.markdown("""
-    <style>
-    .question-card {
-        background-color: #f0f2f6;
-        padding: 1rem;
-        border-radius: 10px;
-        margin-bottom: 1rem;
-        border-left: 4px solid #4CAF50;
-    }
-    </style>
-    """, unsafe_allow_html=True)
 
 # --- Personal Usage Report ---
 elif st.session_state.selected_module == "report":
