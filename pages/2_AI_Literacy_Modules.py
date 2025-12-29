@@ -188,8 +188,8 @@ elif st.session_state.selected_module == "module4":
         
         **Featured Tools:**
         - ChatGPT for brainstorming
-        - DeepSeek for research
-        - Grammarly for editing
+        - Google Gemini for problem-solving
+        - Claude for coding
         """,
         [
             {"title": "Tool Tutorials", "description": "Guides for popular AI tools", "link": "#"},
