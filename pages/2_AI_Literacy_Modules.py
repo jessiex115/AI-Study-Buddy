@@ -187,7 +187,7 @@ elif st.session_state.selected_module == "module4":
         - **Reflective Practice** Evaluating AI's impact on learning
         
         **Featured Tools:**
-        - **ChatGPT** for n
+        - **ChatGPT** for brainstorming
         - **Google Gemini** for problem-solving
         - **Claude** for coding
         """,
