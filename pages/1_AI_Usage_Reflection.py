@@ -105,7 +105,7 @@ if st.session_state.selected_module == "experience":
             )
             st.session_state.reflection2 = st.text_area(
                 "2. Which AI tool did you use?",
-                placeholder="e.g., ChatGPT, DeepSeek, Grammarly, etc.",
+                placeholder="e.g., ChatGPT, Google Gemini, Claude, etc.",
                 value=st.session_state.reflection2
             )
             st.session_state.reflection3 = st.text_area(
