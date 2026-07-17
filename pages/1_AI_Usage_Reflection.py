@@ -152,7 +152,7 @@ elif st.session_state.selected_module == "assessment":
         if st.button("Generate Assessment Questions"):
             try:
                 genai.configure(api_key=st.secrets["google"]["api_key"])
-                model = genai.GenerativeModel("gemini-2.0-flash") # Make sure model name is correct
+                model = genai.GenerativeModel("gemini-2.5-flash") # Make sure model name is correct
 
                 prompt = """Generate exactly 5 multiple-choice questions about AI usage habits for students. 
                 Each question should have 4 options (A-D).
